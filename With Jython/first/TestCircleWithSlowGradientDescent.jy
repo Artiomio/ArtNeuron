@@ -1,0 +1,70 @@
+import time
+import NetworkOne
+
+sampleInputs = [
+                                      [ 1,    0,   1], 
+                                      [ 1/1.44,   1/1.44,   1],
+                                      [1.7/2,   0.5,   1],
+                                      [0.5,   1.7/2,   1],
+
+
+                                      [ -1,    0,   1], 
+                                      [ -1/1.44,   1/1.44,   1],
+                                      [-1.7/2,   0.5,   1],
+                                      [-0.5,   1.7/2,   1],
+
+
+                                      [ -1,    0,   1],
+                                      [ -1/1.44,   -1/1.44,   1],
+                                      [-1.7/2,   -0.5,   1],
+                                      [-0.5,   -1.7/2,   1],
+
+                                      [ 1,    0,   1],
+                                      [ 1/1.44,  - 1/1.44,   1],
+                                      [1.7/2,  - 0.5,   1],
+                                      [0.5,   -1.7/2,   1],
+
+                                      [0.3, 0.3, 1],
+                                      [-0.3, -0.3, 1],
+                                      [-0.3, 0.3, 1],
+                                      [ 0.3, -0.3, 1],
+
+
+
+
+                                  ]
+
+desiredOutputs = [[1], [1],[1], [1],[1], [1],[1], [1],[1], [1],[1], [1],[1], [1],[1], [1], [0], [0],[0], [0]  ]
+network = NetworkOne(3,   [1, 10, 10, 1])
+network.initializeWeightsWithRandomNumbers()
+network.setTrainingSet(sampleInputs, desiredOutputs)
+network.LEARNING_RATE = 0.1
+network.DELTA_W = 0.01
+network.randomWeightAdditionRange = 0.01
+
+while (True):
+    optimizationStartTime = time.time()*1000;
+    # network.slowGradientDescent(100);
+    # network.teachByShakingWeights(1000);
+    network.teachWithBackpropagation(1000);
+
+    optTimeSpent = time.time()*1000 - optimizationStartTime;
+   
+    print"____________Start of next cycle_______________"
+
+
+    
+    for i in range(0, len(sampleInputs)):
+        network.feedForward(sampleInputs[i])
+        print "it must be " , desiredOutputs[i][0] , " : "  , network.output[0]
+
+
+        print "Error = " , network.getMeanSquareError(sampleInputs, desiredOutputs)
+        print "______________________________\n"
+        print "Time spent: " , optTimeSpent , " ms"
+
+
+
+
+
+print "Hello!"

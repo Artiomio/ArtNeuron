@@ -1,0 +1,8 @@
+﻿Learning with:
+    Learning rate: 0.01
+    Random max step: 1.0
+Mini-batch size: 50
+
+Number of backpropagation SGD cycles: 50
+Number of random fantasizing cycles: 20
+

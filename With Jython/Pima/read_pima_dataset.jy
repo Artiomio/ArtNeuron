@@ -1,0 +1,16 @@
+def read_pima_dataset():
+    f = open("pima-indians-diabetes.data", "r")
+    lines = f.readlines()
+    f.close()
+
+    data_set = [[float(y) for y in x.replace("\n", "").split(",")] for x in lines]
+
+    x = [i[:-1] for i in data_set]
+    y = [[i[-1]] for i in data_set]
+    return x, y
+
+if __name__ == "__main__":
+    print("Pima Indians dataset")
+    x, y = read_pima_dataset()
+    print(x[0], y[0])
+

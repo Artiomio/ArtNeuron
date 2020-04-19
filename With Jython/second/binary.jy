@@ -1,0 +1,43 @@
+import time
+#import NetworkOneTanh
+import NetworkOneRELU
+
+network = NetworkOneRELU(3,   [3, 3, 1])
+
+
+sampleInputs = [[ 0, 0, 0], 
+                [ 0, 0, 1],
+                [ 0, 1, 0],
+                [ 0, 1, 1],
+                [ 1, 0, 0],
+                [ 1, 0, 1],
+                [ 1, 1, 0],
+                [ 1, 1, 1],
+               ]
+desiredOutputs = [[0], [1], [2], [3], [4], [5], [6], [7]]
+
+network.setTrainingSet(sampleInputs, desiredOutputs)
+
+network.initializeWeightsWithNormalRandomNumbers(0.1)
+network.LEARNING_RATE = 0.1
+network.DELTA_W = 0.01
+
+while (True):
+    #network.teachByShakingWeights(1000);
+    network.teachWithBackpropagation(10);
+
+   
+    print"____________Start of next cycle_______________"
+
+    #  ѕечать того, что должно быть и что есть 
+    for i in range(0, len(sampleInputs)):
+        network.feedForward(sampleInputs[i])
+        print "it must be " , desiredOutputs[i][0] , " : "  , network.output[0]
+        print "Error = " , network.getMeanSquareError(sampleInputs, desiredOutputs)
+        #print "Time spent: " , optTimeSpent , " ms"
+    print "Error = " , network.getMeanSquareError(sampleInputs, desiredOutputs)
+    print "______________________________\n"
+
+
+
+print "See you later!"

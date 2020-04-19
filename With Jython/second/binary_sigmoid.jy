@@ -1,0 +1,40 @@
+import time
+import ArtConsole
+import NetworkOne
+
+
+console = ArtConsole(20, 50);
+
+network = NetworkOne(3,   [3, 3, 1])
+
+sampleInputs = [[ 0, 0, 0], 
+                [ 0, 0, 1],
+                [ 0, 1, 0],
+                [ 0, 1, 1],
+                [ 1, 0, 0],
+                [ 1, 0, 1],
+                [ 1, 1, 0],
+                [ 1, 1, 1],
+               ]
+desiredOutputs = [[0], [0.1], [0.2], [0.3], [0.4], [0.5], [0.6], [0.7]]
+network.setTrainingSet(sampleInputs, desiredOutputs)
+
+network.initializeWeightsWithNormalRandomNumbers(0.1)
+network.LEARNING_RATE = 0.1
+network.DELTA_W = 0.01
+
+while (True):
+    #network.teachByShakingWeights(1000);
+    network.teachWithBackpropagation(1000);
+    console.clearScreen()
+    for i in range(0, len(sampleInputs)):
+        network.feedForward(sampleInputs[i])
+        console.println("it must be " + str(desiredOutputs[i][0]) + " : "  + str(network.output[0]))
+        #print "Time spent: " , optTimeSpent , " ms"
+
+    console.println("Error = " + str(network.getMeanSquareError(sampleInputs, desiredOutputs)))
+
+
+
+
+print "See you later!"

@@ -1,0 +1,9 @@
+NetworkOne constructor has been run!
+Number of neurons in the output layer: 1
+
+setTrainingSet: setting data set
+Number of training examples : 768
+
+Caution: Default mini-batch covers the whole data set
+The method setTrainingSet() is supposed to run once
+Initializing weights with normal randoms

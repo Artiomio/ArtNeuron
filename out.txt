@@ -1,0 +1,11 @@
+MNIST files loaded successfully
+Transformed to the double64 type
+NetworkOne constructor has been run!
+Number of neurons in the output layer: 10
+Initializing weights with normal randoms
+
+setTrainingSet: setting data set
+Number of training examples : 60000
+
+Caution: Default mini-batch covers the whole data set
+The method setTrainingSet() is supposed to run once

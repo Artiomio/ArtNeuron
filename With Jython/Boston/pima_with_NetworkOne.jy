@@ -1,0 +1,172 @@
+# -*- coding: UTF-8 -*-
+
+import os
+import time
+
+import ArtConsole
+import NetworkOne
+from java.awt.event.KeyEvent import *
+
+# Cчитываем в x симптомы, в y - наличие положительного диагноза
+
+def console_print(*args):
+    console.println(" ".join([str(x) for x in args]))
+
+FILE_NAME = "boston_data.csv"
+
+def read_boston_data(file_name):
+    with open(file_name, "r") as f:
+        f.readline()
+        lines = f.read().split("\n")
+
+
+    X, Y = [], []
+    for l in lines:
+        if len(l) < 1: continue
+        numbers = [float(i) for i in l.split(",")]
+        x = [1, ]
+        y = numbers[-1]
+        x.extend(numbers[: -1])
+        X.append(x)
+        Y.append([y])
+        
+    return X, Y    
+
+
+
+    
+
+def keyboard():
+    global network, console
+
+    # Реакция на нажатия клавиш
+    if console.boolKeyPressed:
+        console_print("KeyPressed!", type(console.keyPressed))
+        console.clearKey()
+        keyCode = console.keyCode
+
+        
+        if keyCode == VK_ADD:
+            network.LEARNING_RATE *= 1.1;
+            console_print("Increasing Learning rate! Now Learning rate is " , network.LEARNING_RATE)
+            console.clearKey()        
+
+        if keyCode == VK_SUBTRACT:
+            network.LEARNING_RATE /= 1.1;
+            console_print("Decreasing Learning rate! Now Learning rate is ",  network.LEARNING_RATE)
+            console.clearKey()
+        """
+        
+        if keyCode == VK_MULTIPLY:
+           network.LEARNING_RATE *= 10;
+           console_print("Increasing Learning rate! Now Learning rate is ", network.LEARNING_RATE)
+        
+
+        if keyCode == VK_DIVIDE:
+            network.LEARNING_RATE /= 10;
+            console_print("Decreasing Learning rate! Now Learning rate is ", network.LEARNING_RATE)
+        
+        """
+
+
+
+
+console = ArtConsole(15, 30);
+
+# Создание сети: 8 входных нейронов
+layers = [1, 1]
+network = NetworkOne(14,  layers)
+
+
+
+
+# Устанавливаем дата-сет
+
+N = 400
+
+all_sample_inputs, all_desired_outputs = read_boston_data("boston_data.csv")
+sample_inputs, desired_outputs = all_sample_inputs[0:N], all_desired_outputs[0:N]
+print(len(sample_inputs), len(desired_outputs))
+#testing_inputs, testing_outputs = all_sample_inputs[N:], all_desired_outputs[N:]
+
+
+
+
+
+
+
+network.setTrainingSet(sample_inputs, desired_outputs)
+
+
+
+
+
+
+
+# Заполняем случайными числами
+network.initializeWeightsWithNormalRandomNumbers(0.1)
+
+network.LEARNING_RATE = 10
+miniBatchSize = 50
+
+
+while (True):
+
+
+    # Проход по всему набору данных с мини-пакетами
+    for  i in range(0, len(sample_inputs) - miniBatchSize +1, miniBatchSize):
+         # Устанавливаем границы мини-пакета в цикле по тренировочным данным 
+         network.setCurrentMiniBatchRange(i, i + miniBatchSize - 1)
+
+         # Минимизируем функцию ошибки на данном мини-пакете
+         network.teachWithBackpropagation(1);
+
+    
+ 
+    # Вычисляем ошибку на всём тренировочном наборе (можно заменить на случайный промежуток впоследствии) */
+    network.setCurrentMiniBatchRange(0 , len(sample_inputs) - 1);
+
+
+    
+    loss = network.getMeanSquareError(sample_inputs, desired_outputs)
+
+
+
+    # Считаем точность (accuracy) - процент ответов, совпадающих с эталонными
+    #number_of_correct_answers_accuracy = accuracy()
+    #accuracy_percentage = 100.0 * number_of_correct_answers_accuracy / len(sample_inputs)
+    #if accuracy_percentage > max_accuracy: max_accuracy = accuracy_percentage
+
+
+
+    # Считаем валидацию
+    #number_of_correct_answers_validation = validation()
+    #validation_percentage = 100.0 * number_of_correct_answers_validation / len(testing_inputs)
+    #if validation_percentage > max_validation: max_validation = validation_percentage
+
+
+
+
+
+
+
+    # Записываем в файл функцию ошибки
+    log_file = open("error.log", "a")
+    log_file.write(str(loss) + "\n")
+    log_file.close()
+
+
+    # Печать
+    console.clearScreen() # После всех расчётов - очищаем экран и печаем данные
+    console_print("Layers:", layers)
+    console_print("Learning rate:", network.LEARNING_RATE)
+    console.println("Error = " + str(loss))
+    
+
+
+
+
+    keyboard()
+
+
+print "See you later!"

@@ -1,0 +1,190 @@
+# -*- coding: UTF-8 -*-
+
+import os
+import time
+
+import ArtConsole
+import NetworkOne
+from java.awt.event.KeyEvent import *
+
+# Cчитываем в x симптомы, в y - наличие положительного диагноза
+def read_pima_dataset(dir="."):
+    f = open(os.path.join(dir, "pima-indians-diabetes.data"), "r")
+    lines = f.readlines()
+    f.close()
+
+    data_set = [[float(y) for y in x.replace("\n", "").split(",")] for x in lines]
+
+    x = [i[:-1] for i in data_set]
+    y = [[i[-1]] for i in data_set]
+    return x, y
+
+def console_print(*args):
+    console.println(" ".join([str(x) for x in args]))
+
+
+
+# Вычисляем количество верно распознанных сетью образцов - на всём дата-сете
+def accuracy():
+    number_of_correct_answers = 0
+    for (i, sample) in enumerate(sample_inputs):
+        network.feedForward(sample)
+        correct_answer = desired_outputs[i][0]
+        if (network.output[0] >= 0.5 and correct_answer == 1) or (network.output[0] < 0.5 and correct_answer == 0):
+            number_of_correct_answers += 1
+
+    return number_of_correct_answers
+
+
+def validation():
+    number_of_correct_answers = 0
+
+    for (i, sample) in enumerate(testing_inputs):
+        network.feedForward(sample)
+        correct_answer = testing_outputs[i][0]
+        if (network.output[0] >= 0.5 and correct_answer == 1) or (network.output[0] < 0.5 and correct_answer == 0):
+            number_of_correct_answers += 1
+
+    return number_of_correct_answers
+    
+
+def keyboard():
+    global network, console
+
+    # Реакция на нажатия клавиш
+    if console.boolKeyPressed:
+        console_print("KeyPressed!", type(console.keyPressed))
+        console.clearKey()
+        keyCode = console.keyCode
+
+        
+        if keyCode == VK_ADD:
+            network.LEARNING_RATE *= 1.1;
+            console_print("Increasing Learning rate! Now Learning rate is " , network.LEARNING_RATE)
+            console.clearKey()        
+
+        if keyCode == VK_SUBTRACT:
+            network.LEARNING_RATE /= 1.1;
+            console_print("Decreasing Learning rate! Now Learning rate is ",  network.LEARNING_RATE)
+            console.clearKey()
+        """
+        
+        if keyCode == VK_MULTIPLY:
+           network.LEARNING_RATE *= 10;
+           console_print("Increasing Learning rate! Now Learning rate is ", network.LEARNING_RATE)
+        
+
+        if keyCode == VK_DIVIDE:
+            network.LEARNING_RATE /= 10;
+            console_print("Decreasing Learning rate! Now Learning rate is ", network.LEARNING_RATE)
+        
+        """
+
+
+
+
+console = ArtConsole(15, 30);
+
+# Создание сети: 8 входных нейронов
+layers = [1, 1]
+network = NetworkOne(8,  layers)
+
+
+
+
+# Устанавливаем дата-сет
+
+N = 668
+all_sample_inputs, all_desired_outputs = read_pima_dataset()
+sample_inputs, desired_outputs = all_sample_inputs[0:N], all_desired_outputs[0:N]
+
+testing_inputs, testing_outputs = all_sample_inputs[N:], all_desired_outputs[N:]
+
+
+
+
+
+
+
+network.setTrainingSet(sample_inputs, desired_outputs)
+
+
+
+
+
+
+
+# Заполняем случайными числами
+network.initializeWeightsWithNormalRandomNumbers(0.1)
+
+network.LEARNING_RATE = 0.001
+miniBatchSize = 10
+
+max_accuracy = 0
+max_validation = 0
+
+while (True):
+
+
+    # Проход по всему набору данных с мини-пакетами
+    for  i in range(0, len(sample_inputs) - miniBatchSize +1, miniBatchSize):
+         # Устанавливаем границы мини-пакета в цикле по тренировочным данным 
+         network.setCurrentMiniBatchRange(i, i + miniBatchSize - 1)
+
+         # Минимизируем функцию ошибки на данном мини-пакете
+         network.teachWithBackpropagation(1);
+
+    
+ 
+    # Вычисляем ошибку на всём тренировочном наборе (можно заменить на случайный промежуток впоследствии) */
+    network.setCurrentMiniBatchRange(0 , len(sample_inputs) - 1);
+
+
+    
+    loss = network.getMeanSquareError(sample_inputs, desired_outputs)
+
+
+
+    # Считаем точность (accuracy) - процент ответов, совпадающих с эталонными
+    number_of_correct_answers_accuracy = accuracy()
+    accuracy_percentage = 100.0 * number_of_correct_answers_accuracy / len(sample_inputs)
+    if accuracy_percentage > max_accuracy: max_accuracy = accuracy_percentage
+
+
+
+    # Считаем валидацию
+    number_of_correct_answers_validation = validation()
+    validation_percentage = 100.0 * number_of_correct_answers_validation / len(testing_inputs)
+    if validation_percentage > max_validation: max_validation = validation_percentage
+
+
+
+
+
+
+
+    # Записываем в файл функцию ошибки
+    log_file = open("error.log", "a")
+    log_file.write(str(loss) + "\n")
+    log_file.close()
+
+
+    # Печать
+    console.clearScreen() # После всех расчётов - очищаем экран и печаем данные
+    console_print("Layers:", layers)
+    console_print("Learning rate:", network.LEARNING_RATE)
+    console.println("Error = " + str(loss))
+    console_print("Accuracy: %.2f" % accuracy_percentage, "%")
+    console_print("Maximum accuracy: %.2f" % max_accuracy, "%")
+    console_print("")
+    console_print("Validation: %.2f" % validation_percentage, "%")
+    console_print("Maximum validation: %.2f" % max_validation, "%")
+
+
+
+
+
+    keyboard()
+
+
+print "See you later!"
